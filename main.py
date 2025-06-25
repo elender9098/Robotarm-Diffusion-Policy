@@ -577,7 +577,7 @@ def train_reach_with_DiffusionPolicy(**kwargs):
     np.random.seed(opt.random_seed)
     torch.manual_seed(opt.random_seed)
     
-    # 使用DiffusionPolicy专用的参数
+    # 使用DiffusionPolicy专用的参数，包含优势函数引导
     replay_buffer = ReplayBuffer_Trajectory_reach(opt.buffer_size)
     agent = DiffusionPolicy_MLP(
         state_dim=state_dim, 
@@ -585,6 +585,7 @@ def train_reach_with_DiffusionPolicy(**kwargs):
         action_bound=action_bound,
         hidden_dim=opt.hidden_dim,
         actor_lr=opt.diffusion_lr,
+        critic_lr=opt.critic_lr,
         num_diffusion_steps=opt.num_diffusion_steps,
         num_inference_steps=opt.num_inference_steps, 
         beta_schedule=opt.beta_schedule,
@@ -594,6 +595,9 @@ def train_reach_with_DiffusionPolicy(**kwargs):
         network_type=opt.network_type,
         horizon_steps=opt.horizon_steps,
         action_horizon=opt.action_horizon,
+        advantage_weight=opt.advantage_weight,
+        gamma=opt.diffusion_gamma,
+        tau=opt.diffusion_tau,
         device=opt.device
     )
 
@@ -622,8 +626,11 @@ def train_reach_with_DiffusionPolicy(**kwargs):
                 if replay_buffer.size() >= opt.minimal_episodes:
                     for _ in range(opt.n_train):
                         transition_dict = replay_buffer.sample(opt.batch_size, use_her=True, her_ratio=opt.her_ratio)
-                        loss = agent.train(transition_dict)
-                        vis.plot("diffusion_loss", loss)
+                        loss_dict = agent.train(transition_dict)
+                        vis.plot("diffusion_loss", loss_dict['diffusion_loss'])
+                        vis.plot("value_loss", loss_dict['value_loss'])
+                        vis.plot("q_loss", loss_dict['q_loss'])
+                        vis.plot("advantage_mean", loss_dict['advantage_mean'])
                         
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({
@@ -673,6 +680,7 @@ def train_reach_with_DiffusionPolicy_CNN(**kwargs):
         action_bound=action_bound,
         hidden_dim=opt.hidden_dim,
         actor_lr=opt.diffusion_lr,
+        critic_lr=opt.critic_lr,
         num_diffusion_steps=opt.num_diffusion_steps,
         num_inference_steps=opt.num_inference_steps,
         beta_schedule=opt.beta_schedule,
@@ -682,6 +690,9 @@ def train_reach_with_DiffusionPolicy_CNN(**kwargs):
         network_type="unet",  # CNN版本建议使用unet
         horizon_steps=opt.horizon_steps,
         action_horizon=opt.action_horizon,
+        advantage_weight=opt.advantage_weight,
+        gamma=opt.diffusion_gamma,
+        tau=opt.diffusion_tau,
         device=opt.device
     )
 
@@ -710,8 +721,11 @@ def train_reach_with_DiffusionPolicy_CNN(**kwargs):
                 if replay_buffer.size() >= opt.minimal_episodes:
                     for _ in range(opt.n_train):
                         transition_dict = replay_buffer.sample(opt.batch_size, use_her=False, her_ratio=opt.her_ratio)
-                        loss = agent.train(transition_dict)
-                        vis.plot("diffusion_loss", loss)
+                        loss_dict = agent.train(transition_dict)
+                        vis.plot("diffusion_loss", loss_dict['diffusion_loss'])
+                        vis.plot("value_loss", loss_dict['value_loss'])
+                        vis.plot("q_loss", loss_dict['q_loss'])
+                        vis.plot("advantage_mean", loss_dict['advantage_mean'])
                         
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({

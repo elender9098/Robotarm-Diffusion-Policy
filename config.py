@@ -67,6 +67,11 @@ class DefaultConfig(object):
     action_horizon = 8           # 实际执行动作数量
     diffusion_lr = 3e-4          # Diffusion Policy学习率
 
+    # Advantage-guided Diffusion Policy parameters
+    advantage_weight = 1.0       # 优势函数权重 (控制优势函数对diffusion loss的影响强度)
+    diffusion_gamma = 0.99       # Diffusion Policy中价值函数的折扣因子
+    diffusion_tau = 0.005        # Diffusion Policy中目标网络的软更新参数
+
     def _parse(self, kwargs):
         """
         根据字典kwargs 更新 config参数
