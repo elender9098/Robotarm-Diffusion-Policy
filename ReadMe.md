@@ -1,5 +1,5 @@
 # Diffusion Policy pybullet Usage Guide:
-Author Contact: reicholguk@proton.me
+
 ## 🎯 Overview
 
 Diffusion Policy is a powerful behavior cloning method that models action sequences using diffusion models. This implementation includes receding horizon optimization and supports both MLP and U-Net architectures.This directory contains the implementation of Diffusion Policy for robotic manipulation tasks.The basic envs for the robotarm on pybullet by reinforcement learning refers to https://github.com/Shimly-2/DRL-on-robot-arm.git.
